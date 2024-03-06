@@ -1,0 +1,66 @@
+DEFINITION MODULE JSON;
+
+FROM DynamicStrings IMPORT String;
+
+EXPORT JSONType, JSONValue, JSONNode, JSONArray, JSONObject,
+       Top, Parent, Child,
+       Add, RemoveNext,
+       Literal, Representation;
+
+TYPE
+   JSONType = (Invalid, Null, Boolean, Integer, Real, String, Array, Object, Raw);
+
+   JSONObject = POINTER TO JSONNode;
+
+
+   (* JSONArray - a linked list type representing a JSON array *)
+   JSONArray = RECORD
+      next: POINTER TO JSONArray;
+      element: JSONValue;
+   END;
+
+   JSONValue = RECORD
+    type: CASE JSONType OF
+      Invalid:
+         err: String |
+      Null:
+         null: String |
+      Boolean:
+         b: BOOLEAN |
+      Integer:
+         i: LONGINT |
+      Real:
+         r: LONGREAL |
+      String:
+         s: String |
+      Array:
+         a: JSONArray |
+      Object:
+         obj: JSONObject |
+      Raw:
+         raw: String
+   END;
+
+   JSONNode = RECORD
+      tag: String;
+      parent, child: JSONObject;
+      value: JSONValue;
+   END;
+
+PROCEDURE CreateJSONBoolean(b: BOOLEAN): JSONValue;
+PROCEDURE CreateJSONInteger(i: LONGINT): JSONValue;
+PROCEDURE CreateJSONReal(i: LONGREAL): JSONValue;
+PROCEDURE CreateJSONString(s: String): JSONValue;
+
+PROCEDURE JSONArrayAdd(VAR a: JSONArray);
+
+PROCEDURE Create(tag: String, type: JSONType, value: JSONValue): JSONObject;
+PROCEDURE Top(obj: JSONObject): JSONObject;
+PROCEDURE Parent(obj: JSONObject): JSONObject;
+PROCEDURE Child(obj: JSONObject): JSONObject;
+PROCEDURE Add(VAR parent: JSONObject, obj: JSONObject);
+PROCEDURE RemoveNext(VAR parent: JSONObject);
+PROCEDURE Tag(obj: JSONObject): String;
+PROCEDURE Representation(obj: JSONValue): String;
+
+END JSON.
